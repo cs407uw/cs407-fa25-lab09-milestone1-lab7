@@ -17,29 +17,31 @@ class BallViewModel : ViewModel() {
     private val _ballPosition = MutableStateFlow(Offset.Zero)
     val ballPosition: StateFlow<Offset> = _ballPosition.asStateFlow()
 
-    /**
-     * Called by the UI when the game field's size is known.
-     */
+    private val ACCELERATION_SCALE = 50f
+
     fun initBall(fieldWidth: Float, fieldHeight: Float, ballSizePx: Float) {
         if (ball == null) {
             ball = Ball(fieldWidth, fieldHeight, ballSizePx)
-
             _ballPosition.value = Offset(ball!!.posX, ball!!.posY)
         }
     }
 
-    /**
-     * Called by the SensorEventListener in the UI.
-     */
     fun onSensorDataChanged(event: SensorEvent) {
         val currentBall = ball ?: return
 
         if (event.sensor.type == Sensor.TYPE_GRAVITY) {
             if (lastTimestamp != 0L) {
-                val NS2S = 1.0f / 1000000000.0f
+                val NS2S = 1.0f / 1_000_000_000.0f
                 val dT = (event.timestamp - lastTimestamp) * NS2S
 
-                currentBall.updatePositionAndVelocity(xAcc = event.values[0], yAcc = -event.values[1], dT = dT)
+                val scaledXAcc = -event.values[0] * ACCELERATION_SCALE
+                val scaledYAcc = event.values[1] * ACCELERATION_SCALE
+
+                currentBall.updatePositionAndVelocity(
+                    xAcc = scaledXAcc,
+                    yAcc = scaledYAcc,
+                    dT = dT
+                )
 
                 currentBall.checkBoundaries()
 
@@ -52,9 +54,7 @@ class BallViewModel : ViewModel() {
 
     fun reset() {
         ball?.reset()
-
         ball?.let { _ballPosition.value = Offset(it.posX, it.posY) }
-
         lastTimestamp = 0L
     }
 }

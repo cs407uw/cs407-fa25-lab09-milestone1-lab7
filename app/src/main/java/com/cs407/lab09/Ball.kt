@@ -28,7 +28,12 @@ class Ball(
 
     /**
      * Updates the ball's position and velocity based on the given acceleration and time step.
-     * (See lab handout for physics equations)
+     *
+     * Using the equations from the lab handout:
+     * - v1 = v0 + 0.5 * (a0 + a1) * dt           (Equation 1)
+     * - l = v0 * dt + (1/6) * dt^2 * (3*a0 + a1)  (Equation 2)
+     *
+     * These equations assume linear acceleration change within the time interval.
      */
     fun updatePositionAndVelocity(xAcc: Float, yAcc: Float, dT: Float) {
         if(isFirstUpdate) {
@@ -60,16 +65,19 @@ class Ball(
      * boundary should be set to 0.
      */
     fun checkBoundaries() {
+        // Left boundary
         if (posX < 0) {
             posX = 0f
             velocityX = 0f
             accX = 0f
         }
+        // Right boundary
         if (posX > backgroundWidth - ballSize) {
             posX = backgroundWidth - ballSize
             velocityX = 0f
             accX = 0f
         }
+
         if (posY < 0) {
             posY = 0f
             velocityY = 0f
